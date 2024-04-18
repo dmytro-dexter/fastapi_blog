@@ -23,13 +23,15 @@ def retreive_blog(id: int, db: Session):
 
 
 def get_all_active_blogs(db: Session):
-    return db.query(Blog).filter(Blog.is_active == True).all()
+    return db.query(Blog).all()
 
 
 def update_blog_by_id(id: int, blog: UpdateBlog, db: Session, author_id: int = 1):
     blog_object = db.query(Blog).filter(Blog.id == id).first()
     if not blog_object:
-        return
+        return {"error": "Blog with this id doesn't exist"}
+    if not blog_object.author_id == author_id:
+        return {"error": "Only the author can modifu the blog"}
     for key, value in blog:
         setattr(blog_object, key, value)
     db.add(blog_object)
@@ -37,10 +39,12 @@ def update_blog_by_id(id: int, blog: UpdateBlog, db: Session, author_id: int = 1
     return blog_object
 
 
-def delete_blog_by_id(id: int, db: Session):
-    blog_object = db.query(Blog).filter(Blog.id == id).first()
-    if not blog_object:
+def delete_blog_by_id(id: int, db: Session, author_id: int):
+    blog_object = db.query(Blog).filter(Blog.id == id)
+    if not blog_object.first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Blog with ID not found")
+    if not blog_object.first().author_id == author_id:
+        return {"error": "Only the author can delete a blog"}
 
-    db.delete(blog_object)
+    blog_object.delete()
     db.commit()
