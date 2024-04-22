@@ -31,7 +31,7 @@ def update_blog_by_id(id: int, blog: UpdateBlog, db: Session, author_id: int = 1
     if not blog_object:
         return {"error": "Blog with this id doesn't exist"}
     if not blog_object.author_id == author_id:
-        return {"error": "Only the author can modifu the blog"}
+        return {"error": "Only the author can modify the blog"}
     for key, value in blog:
         setattr(blog_object, key, value)
     db.add(blog_object)
